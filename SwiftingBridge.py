@@ -86,13 +86,33 @@ def isInterface(line):
 def parseType(type):
     type = type.rstrip("* ")
     
-    if type == "id":
-        return "AnyObject"
+    typeDict = {
+                "id": "AnyObject",
+                "BOOL":                 "Bool",
+                "bool":                 "CBool",
+                "char":                 "CChar",
+                "signed char":          "CChar",
+                "unsigned char":        "CUnsignedChar",
+                "short":                "CShort",
+                "unsigned short":       "CUnsignedShort",
+                "int":                  "CInt",
+                "unsigned int":         "CUnsignedInt",
+                "long":                 "CLong",
+                "unsigned long":        "CUnsignedLong",
+                "long long":            "CLongLong",
+                "unsigned long long":   "CUnsignedLongLong",
+                "wchar_t":              "CWideChar",
+                "char16_t":             "CChar16",
+                "char32_t":             "CChar32",
+                "float":                "CFloat",
+                "double":               "CDouble"
+    }
     
-    elif type == "BOOL":
-        return "Bool"
+    try:
+        return typeDict[type]
 
-    return type
+    except KeyError:
+        return type
 
 def escapedName(name):
     reservedWords = ["as", "in", "for", "class", "deinit", "enum", "extension", "func", "import", "init", "internal", "let", "operator", "private", "protocol", "public", "static", "struct", "subscript", "typealias", "var", "break", "case", "continue", "default", "do", "else", "fallthrough", "for", "if", "in", "return", "switch", "where", "while", "as", "dynamicType", "false", "is", "nil", "self", "Self", "super", "true", "__COLUMN__", "__FILE__", "__FUNCTION__", "__LINE__", " associativity", "convenience", "dynamic", "didSet", "final", "get", "infix", "inout", "lazy", "left", "mutating", "none", "nonmutating", "optional", "override", "postfix", "precedence", "prefix", "Protocol", "required", "right", "set", "Type", "unowned", "weak", "willSet"]
