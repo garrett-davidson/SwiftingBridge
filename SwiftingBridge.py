@@ -73,7 +73,6 @@ def isInterface(line):
             super = line[line.index(":")+2:-1]
             if super in definedTypes:
                 out.write(": " + super)
-                super = None
         except ValueError:
             super = None
 
@@ -91,8 +90,11 @@ def isInterface(line):
         
         out.write("}\n")
 
-        if super:
-            out.write("extension " + super + " : " + interfaceName + "{}\n")
+        if super != "SBApplication": #Assume everything else inherits from SBObject
+            out.write("extension SBObject: " + interfaceName + "{}\n")
+
+        else:
+            out.write("extension SBApplication: " + interfaceName + "{}\n")
 
         return True
 
