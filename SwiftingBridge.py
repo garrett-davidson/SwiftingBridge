@@ -48,7 +48,7 @@ def isImport(line):
 def isEnum(line):
     if line[:4] == "enum":
         enumName = line[5:line.index(" {")]
-        out.write("enum " + enumName + ": {\n")
+        out.write("@objc enum " + enumName + ": {\n")
         print "Warning: Must give type to enum " + enumName
 
         while not "};" in line:
@@ -67,7 +67,17 @@ def isInterface(line):
     global definedTypes
     if line[:10] == "@interface":
         interfaceName = line[11:line[11:].index(" ") + 11]
-        out.write("protocol " + interfaceName + " {\n")
+
+        out.write("@objc protocol " + interfaceName)
+        try:
+            super = line[line.index(":")+2:-1]
+            if super in definedTypes:
+                out.write(": " + super)
+                super = None
+        except ValueError:
+            super = None
+
+        out.write(" {\n")
         
         if interfaceName in definedTypes:
             print "Warning: protocol for type '" + interfaceName + "' defined multiple times"
@@ -81,13 +91,16 @@ def isInterface(line):
         
         out.write("}\n")
 
+        if super:
+            out.write("extension " + super + " : " + interfaceName + "{}\n")
+
         return True
 
 def parseType(type):
     type = type.rstrip("* ")
     
     typeDict = {
-                "id": "AnyObject",
+                "id":                   "AnyObject",
                 "BOOL":                 "Bool",
                 "bool":                 "CBool",
                 "char":                 "CChar",
@@ -149,7 +162,7 @@ def isProperty(line):
         type = line[line[:nameIndex].rfind(" ")+1:nameIndex]
         type = parseType(type)
 
-        out.write("\tvar " + name + ": " + type + " {get")
+        out.write("\toptional var " + name + ": " + type + " {get")
 
         if readonly:
             out.write("}\n")
@@ -184,7 +197,7 @@ def isFunction(line):
         
             outparams.append((name, type))
 
-        out.write("\tfunc " + funcName + "(")
+        out.write("\toptional func " + funcName + "(")
         
         if len(outparams) > 0:
             (param, type) = outparams.pop(0)
