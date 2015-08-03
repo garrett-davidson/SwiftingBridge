@@ -48,18 +48,33 @@ def isImport(line):
 def isEnum(line):
     if line[:4] == "enum":
         enumName = line[5:line.index(" {")]
-        out.write("@objc enum " + enumName + ": {\n")
-        print "Warning: Must give type to enum " + enumName
+        out.write("@objc enum " + enumName + ": ")
 
+        line = f.readline()
+        if "'" in line:
+            out.write("NSInteger ")
+        else:
+            print "Warning: Must give type to enum " + enumName
+        
+        out.write("{\n")
         while not "};" in line:
-            line = f.readline()
-            line = line.replace("'", '"') #replace single quotes with double quotes
             line = line.replace(",", "") #remove trailing commas
-            if " = " in line:
+
+            if "'" in line:
+                text = line[line.find("'") + 1:line.rfind("'")]
                 out.write("\tcase ")
-                out.write(line[1:])
+                out.write(line[1:line.find(" = ") + 3])
+                out.write("0x" + text.encode("hex"))
+                out.write(line[line.rfind("'")+1:])
             else:
-                out.write(line)
+                if " = " in line:
+                    out.write("\tcase ")
+                    out.write(line[1:])
+                else:
+                    out.write(line)
+            line = f.readline()
+
+        out.write(line)
 
         return True
 
